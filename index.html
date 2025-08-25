@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎨 Colory - Color Wheel Pro</title>
+<style>
+  /* -------- Theme & Layout -------- */
+  :root{
+    --bg:#f0f0f3; --text:#111; --panel:#fff;
+    --shadow-light:#ffffff; --shadow-dark:#d1d9e6;
+    --accent:#6c6cf7;
+  }
+  body.dark{
+    --bg:#1e1e2f; --text:#eee; --panel:#2a2a3d;
+    --shadow-light:#353545; --shadow-dark:#151521;
+    --accent:#8aa0ff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,system-ui,Arial,sans-serif;
+    background:var(--bg); color:var(--text);
+    display:flex; justify-content:center; align-items:flex-start;
+    min-height:100vh; padding:20px; transition:background .3s,color .3s;
+  }
+  .app-frame{
+    width:380px; max-width:96vw;
+    background:var(--panel);
+    border:2px solid var(--shadow-dark);
+    border-radius:18px;
+    box-shadow: 10px 10px 24px var(--shadow-dark),
+                -10px -10px 24px var(--shadow-light);
+    padding:18px; display:flex; flex-direction:column; gap:18px;
+  }
+  .bar{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{
+    width:28px; height:28px; border-radius:8px;
+    background: radial-gradient(circle at 30% 30%, #ff7a7a, #7aa8ff 70%);
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,.1), inset -3px -3px 6px rgba(255,255,255,.5);
+    border:1px solid var(--shadow-dark);
+  }
+  h1{font-size:18px; margin:0}
+  .toggle{border:none; border-radius:10px; padding:6px 10px; cursor:pointer;
+    background:var(--shadow-dark); color:var(--text)}
+  .section{
+    width:100%; padding:12px; border-radius:14px; background:var(--panel);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                inset -6px -6px 12px var(--shadow-light);
+  }
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .btn{
+    border:none; border-radius:10px; padding:8px 12px; cursor:pointer;
+    background:var(--shadow-dark); color:var(--text); transition:transform .06s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:linear-gradient(180deg, var(--accent), #5a5adf); color:#fff; border:1px solid rgba(0,0,0,.15)}
+  .pill{padding:6px 10px; border-radius:999px; border:1px solid var(--shadow-dark); background:var(--panel)}
+  .copy{font-size:12px; opacity:.8; cursor:pointer}
+  .copy:hover{text-decoration:underline}
+
+  /* -------- Color Preview & Values -------- */
+  .preview{
+    width:100%; height:70px; border-radius:14px; border:2px solid var(--shadow-dark);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+  }
+  .values{display:grid; grid-template-columns:1fr; gap:4px; text-align:center; font-size:14px}
+  .values .line{display:flex; justify-content:center; gap:8px; align-items:center}
+  .values code{font-family:ui-monospace,Consolas,monospace; padding:2px 6px; border-radius:8px; background:rgba(0,0,0,.06)}
+  .linkish{cursor:pointer; text-decoration:underline; opacity:.85}
+
+  /* -------- Wheel & Favorites -------- */
+  #colorWheel{
+    cursor:crosshair; border-radius:50%;
+    margin-top:14px; /* small gap so it doesn't touch the frame top */
+    border:1px solid var(--shadow-dark);
+    box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+  }
+  .favorites{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+  .swatch{
+    width:30px; height:30px; border-radius:8px; border:1px solid var(--shadow-dark); cursor:pointer;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,.15), inset -2px -2px 4px rgba(255,255,255,.4);
+  }
+
+  /* -------- Gradient -------- */
+  #gradientPreview{
+    height:64px; border-radius:12px; border:1px solid var(--shadow-dark); margin-top:8px;
+    box-shadow: inset 3px 3px 8px var(--shadow-dark), inset -3px -3px 8px var(--shadow-light);
+  }
+
+  /* -------- Contrast -------- */
+  .contrast-result{margin-top:6px; font-size:14px}
+
+  /* -------- Camera / Photo -------- */
+  #photoCanvas{
+    width:100%; height:auto; border-radius:12px; border:1px solid var(--shadow-dark);
+    background:#000; display:block; margin-top:8px;
+  }
+
+  /* -------- Project Manager -------- */
+  .list{display:flex; flex-direction:column; gap:8px; margin-top:10px}
+  .project-card{
+    border:1px solid var(--shadow-dark); border-radius:12px; padding:10px; background:var(--panel);
+    box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+  }
+  .project-head{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .project-name{font-weight:600}
+  .mini-grid{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+  .mini{width:22px; height:22px; border-radius:6px; border:1px solid var(--shadow-dark)}
+  .muted{opacity:.7; font-size:12px}
+  .input{width:100%; padding:8px 10px; border-radius:10px; border:1px solid var(--shadow-dark); background:var(--panel); color:var(--text)}
+  .inline-actions{display:flex; gap:6px; flex-wrap:wrap}
+  .divider{height:1px; background:var(--shadow-dark); opacity:.5; margin:10px 0}
+
+  footer{font-size:12px; opacity:.75; text-align:center}
+</style>
+</head>
+<body>
+  <div class="app-frame" role="application" aria-label="Color Wheel Pro">
+    <!-- Top Bar -->
+    <div class="bar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Colory</h1>
+          <div class="muted">© Colory 2025</div>
+        </div>
+      </div>
+      <button class="toggle" id="modeBtn" title="Toggle dark/light" aria-label="Toggle dark mode">🌙</button>
+    </div>
+
+    <!-- Live Preview -->
+    <div id="colorPreview" class="preview" aria-live="polite"></div>
+    <div class="values">
+      <div class="line"><span>RGB:</span> <code id="valRGB">rgb(0,0,0)</code> <span class="copy" data-copy="valRGB">Copy</span></div>
+      <div class="line"><span>HEX:</span> <code id="valHEX">#000000</code> <span class="copy" data-copy="valHEX">Copy</span></div>
+      <div class="line"><span>HSB:</span> <code id="valHSB">hsb(0°,0%,0%)</code> <span class="copy" data-copy="valHSB">Copy</span></div>
+      <div class="line"><span>Name:</span> <code id="valNAME">—</code></div>
+      <div class="muted">Tip: Right-click to freeze/unfreeze a color.</div>
+    </div>
+
+    <!-- Color Wheel -->
+    <canvas id="colorWheel" width="300" height="300" aria-label="Interactive color wheel"></canvas>
+    <div class="row">
+      <button class="btn" id="addFav">Add to Favorites</button>
+      <button class="btn" id="clearFav">Clear Favorites</button>
+      <button class="btn" id="dlPalette">Download Favorites JSON</button>
+    </div>
+    <div class="favorites" id="favList" aria-label="Favorites"></div>
+
+    <!-- Gradient Generator -->
+    <div class="section">
+      <div class="row" style="justify-content:space-between">
+        <strong>Gradient Generator</strong>
+        <span class="muted">Linear • Radial • Angular</span>
+      </div>
+      <div class="row">
+        <select id="gradType" class="pill" aria-label="Gradient type">
+          <option value="linear">Linear</option>
+          <option value="radial">Radial</option>
+          <option value="conic">Angular</option>
+        </select>
+        <input id="gradC1" type="color" value="#ff0066" class="pill" aria-label="Gradient color 1">
+        <input id="gradC2" type="color" value="#0066ff" class="pill" aria-label="Gradient color 2">
+        <input id="gradAngle" type="range" min="0" max="360" value="90" class="pill" aria-label="Linear angle">
+        <span id="gradLabel" class="muted">90°</span>
+      </div>
+      <div id="gradientPreview"></div>
+      <div class="row">
+        <button class="btn" id="copyGrad">Copy CSS</button>
+        <span id="gradCss" class="muted" style="user-select:all"></span>
+      </div>
+    </div>
+
+    <!-- Contrast Checker -->
+    <div class="section">
+      <div class="row" style="justify-content:space-between">
+        <strong>Contrast Checker (WCAG)</strong>
+        <span class="muted">AA ≥ 4.5 • AAA ≥ 7</span>
+      </div>
+      <div class="row">
+        <label class="pill">FG <input id="ccFG" type="color" value="#111111"></label>
+        <label class="pill">BG <input id="ccBG" type="color" value="#ffffff"></label>
+        <button class="btn" id="swapCC">Swap</button>
+      </div>
+      <div id="ccResult" class="contrast-result">Ratio: —</div>
+    </div>
+
+    <!-- Camera / Photo Picker -->
+    <div class="section">
+      <div class="row" style="justify-content:space-between">
+        <strong>Camera / Photo Color Picker</strong>
+        <span class="muted">Hover to sample colors</span>
+      </div>
+      <div class="row">
+        <button class="btn" id="openCam">Open Camera</button>
+        <input type="file" id="photoInput" accept="image/*" class="pill"/>
+        <button class="btn" id="stopCam">Stop</button>
+      </div>
+      <canvas id="photoCanvas" width="300" height="200" aria-label="Camera or photo preview"></canvas>
+      <div class="muted">Right-click on photo canvas to freeze/unfreeze too.</div>
+    </div>
+
+    <!-- Palette & Project Manager -->
+    <div class="section">
+      <div class="row" style="justify-content:space-between">
+        <strong>Palette & Project Manager</strong>
+        <span class="muted">Create, organize, import/export</span>
+      </div>
+
+      <!-- Create / Rename -->
+      <div class="row">
+        <input id="projName" class="input" placeholder="New Project Name" />
+        <button class="btn btn-primary" id="createProj">Create</button>
+      </div>
+      <div class="row">
+        <select id="projSelect" class="pill" aria-label="Open project"></select>
+        <button class="btn" id="openProj">Open</button>
+        <button class="btn" id="renameProj">Rename</button>
+        <button class="btn" id="deleteProj">Delete</button>
+      </div>
+
+      <!-- Current Project Actions -->
+      <div class="divider"></div>
+      <div class="row">
+        <button class="btn" id="addToProj">Add Current Color</button>
+        <button class="btn" id="undoBtn">Undo</button>
+        <button class="btn" id="redoBtn">Redo</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="expJSON">Export JSON</button>
+        <button class="btn" id="expHEX">Export HEX</button>
+        <label class="btn"><input id="impJSON" type="file" accept="application/json" style="display:none">Import JSON</label>
+      </div>
+
+      <!-- Current Project View -->
+      <div class="divider"></div>
+      <div id="currentProjectName" class="project-name">No project opened</div>
+      <div id="currentPalette" class="mini-grid" aria-label="Current project palette"></div>
+
+      <!-- All Projects Overview -->
+      <div class="divider"></div>
+      <div class="muted">All Projects</div>
+      <div id="projectsList" class="list"></div>
+    </div>
+
+    <footer>Made with ❤️ &amp; Works offline • No external APIs</footer>
+  </div>
+
+<script>
+/* ===========================
+   Utilities
+=========================== */
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+function rgbToHex(r,g,b){return "#"+[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("").toLowerCase();}
+function hexToRgb(hex){
+  const c = hex.replace("#",""); const n = parseInt(c,16);
+  return [(n>>16)&255,(n>>8)&255,n&255];
+}
+function rgbToHsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  let max=Math.max(r,g,b), min=Math.min(r,g,b), h, s, v=max, d=max-min;
+  s = max===0 ? 0 : d/max;
+  if(max===min){h=0;}
+  else{
+    switch(max){
+      case r: h=(g-b)/d + (g<b?6:0); break;
+      case g: h=(b-r)/d + 2; break;
+      case b: h=(r-g)/d + 4; break;
+    }
+    h/=6;
+  }
+  return {h:Math.round(h*360), s:Math.round(s*100), v:Math.round(v*100)};
+}
+function luminance(r,g,b){
+  const a=[r,g,b].map(v=>{
+    v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
+  });
+  return a[0]*0.2126 + a[1]*0.7152 + a[2]*0.0722;
+}
+function contrast(rgb1, rgb2){
+  const L1 = luminance(...rgb1) + 0.05;
+  const L2 = luminance(...rgb2) + 0.05;
+  return (L1>L2? L1/L2 : L2/L1);
+}
+
+/* Standard web-ish color names (compact) */
+const colorNames = {
+  "#000000":"Black","#ffffff":"White","#ff0000":"Red","#00ff00":"Lime","#0000ff":"Blue",
+  "#ffff00":"Yellow","#00ffff":"Cyan","#ff00ff":"Magenta","#c0c0c0":"Silver","#808080":"Gray",
+  "#800000":"Maroon","#808000":"Olive","#008000":"Green","#800080":"Purple","#008080":"Teal","#000080":"Navy",
+  "#ffa500":"Orange","#a52a2a":"Brown","#f0e68c":"Khaki","#ffc0cb":"Pink","#40e0d0":"Turquoise",
+  "#ff1493":"DeepPink","#00ced1":"DarkTurquoise","#228b22":"ForestGreen","#ffd700":"Gold","# 708090":"SlateGray".replace(" ","")
+};
+function nearestColorName(r,g,b){
+  let nearest="—", min=Infinity;
+  for(const hex in colorNames){
+    const [cr,cg,cb] = hexToRgb(hex);
+    const d = (r-cr)**2 + (g-cg)**2 + (b-cb)**2;
+    if(d<min){min=d; nearest=colorNames[hex];}
+  }
+  return nearest;
+}
+
+/* ===========================
+   Theme
+=========================== */
+const modeBtn = document.getElementById("modeBtn");
+modeBtn.addEventListener("click", ()=> {
+  document.body.classList.toggle("dark");
+  modeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+});
+
+/* ===========================
+   Live Values & Copy
+=========================== */
+const preview = document.getElementById("colorPreview");
+const elRGB = document.getElementById("valRGB");
+const elHEX = document.getElementById("valHEX");
+const elHSB = document.getElementById("valHSB");
+const elNAME= document.getElementById("valNAME");
+
+function updateDisplay(r,g,b){
+  r=clamp(Math.round(r),0,255);
+  g=clamp(Math.round(g),0,255);
+  b=clamp(Math.round(b),0,255);
+  const hex = rgbToHex(r,g,b);
+  const {h,s,v} = rgbToHsv(r,g,b);
+  elRGB.textContent = `rgb(${r},${g},${b})`;
+  elHEX.textContent = hex;
+  elHSB.textContent = `hsb(${h}°,${s}%,${v}%)`;
+  elNAME.textContent = nearestColorName(r,g,b);
+  preview.style.background = hex;
+}
+document.querySelectorAll(".copy").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const id = btn.getAttribute("data-copy");
+    const txt = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(txt);
+    btn.textContent = "Copied!";
+    setTimeout(()=>btn.textContent="Copy", 700);
+  });
+});
+
+/* ===========================
+   Color Wheel (hover + freeze)
+=========================== */
+const wheel = document.getElementById("colorWheel");
+const wctx = wheel.getContext("2d");
+let frozen = false;
+
+function drawWheel(){
+  const R = wheel.width/2, cx=R, cy=R;
+  // Proper HSV wheel: hue by angle, saturation by radius; value fixed at 1.0
+  const img = wctx.createImageData(wheel.width, wheel.height);
+  for(let y=0; y<wheel.height; y++){
+    for(let x=0; x<wheel.width; x++){
+      const dx = x - cx, dy = y - cy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist>R){ // outside circle -> transparent
+        const idx = (y*wheel.width + x)*4;
+        img.data[idx+3]=0;
+        continue;
+      }
+      const sat = clamp(dist/R, 0, 1);
+      let ang = Math.atan2(dy, dx); // -PI..PI
+      let hue = (ang*180/Math.PI + 360) % 360;
+      // HSV -> RGB (v=1)
+      const c = 1 * sat;
+      const hh = hue/60;
+      const X = c*(1-Math.abs((hh%2)-1));
+      let [rr,gg,bb]=[0,0,0];
+      if(0<=hh && hh<1) [rr,gg,bb]=[c,X,0];
+      else if(1<=hh && hh<2) [rr,gg,bb]=[X,c,0];
+      else if(2<=hh && hh<3) [rr,gg,bb]=[0,c,X];
+      else if(3<=hh && hh<4) [rr,gg,bb]=[0,X,c];
+      else if(4<=hh && hh<5) [rr,gg,bb]=[X,0,c];
+      else [rr,gg,bb]=[c,0,X];
+      const m = 1 - c;
+      const R8 = Math.round((rr+m)*255);
+      const G8 = Math.round((gg+m)*255);
+      const B8 = Math.round((bb+m)*255);
+      const idx = (y*wheel.width + x)*4;
+      img.data[idx]  = R8;
+      img.data[idx+1]= G8;
+      img.data[idx+2]= B8;
+      img.data[idx+3]= 255;
+    }
+  }
+  wctx.putImageData(img,0,0);
+}
+drawWheel();
+
+wheel.addEventListener("mousemove", (e)=>{
+  if(frozen) return;
+  const rect = wheel.getBoundingClientRect();
+  const x = e.clientX-rect.left, y = e.clientY-rect.top;
+  const px = wctx.getImageData(x, y, 1, 1).data;
+  if(px[3]===0) return; // outside circle
+  updateDisplay(px[0], px[1], px[2]);
+});
+wheel.addEventListener("contextmenu", (e)=>{
+  e.preventDefault();
+  frozen = !frozen;
+});
+
+/* ===========================
+   Favorites
+=========================== */
+const favList = document.getElementById("favList");
+let favorites = [];
+
+function renderFavs(){
+  favList.innerHTML="";
+  favorites.forEach((hex, i)=>{
+    const d = document.createElement("div");
+    d.className="swatch"; d.style.background=hex; d.title=hex;
+    d.addEventListener("click", ()=> updateDisplay(...hexToRgb(hex)));
+    d.addEventListener("contextmenu", (ev)=>{ev.preventDefault(); favorites.splice(i,1); renderFavs();});
+    favList.appendChild(d);
+  });
+}
+document.getElementById("addFav").addEventListener("click", ()=>{
+  const hex = elHEX.textContent;
+  if(!favorites.includes(hex)){favorites.push(hex); renderFavs();}
+});
+document.getElementById("clearFav").addEventListener("click", ()=>{
+  favorites = []; renderFavs();
+});
+document.getElementById("dlPalette").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(favorites,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "favorites.json"; a.click();
+});
+
+/* ===========================
+   Gradient Generator
+=========================== */
+const gradType = document.getElementById("gradType");
+const gradC1 = document.getElementById("gradC1");
+const gradC2 = document.getElementById("gradC2");
+const gradAngle = document.getElementById("gradAngle");
+const gradLabel = document.getElementById("gradLabel");
+const gradPrev = document.getElementById("gradientPreview");
+const gradCss = document.getElementById("gradCss");
+
+function updateGradient(){
+  let css="";
+  if(gradType.value==="linear"){
+    gradAngle.style.display="inline-block"; gradLabel.style.display="inline-block";
+    gradLabel.textContent = `${gradAngle.value}°`;
+    css = `linear-gradient(${gradAngle.value}deg, ${gradC1.value}, ${gradC2.value})`;
+  }else if(gradType.value==="radial"){
+    gradAngle.style.display="none"; gradLabel.style.display="none";
+    css = `radial-gradient(circle, ${gradC1.value}, ${gradC2.value})`;
+  }else{
+    gradAngle.style.display="none"; gradLabel.style.display="none";
+    css = `conic-gradient(from 0deg, ${gradC1.value}, ${gradC2.value})`;
+  }
+  gradPrev.style.background = css;
+  gradCss.textContent = css;
+  return css;
+}
+[gradType, gradC1, gradC2, gradAngle].forEach(el=> el.addEventListener("input", updateGradient));
+updateGradient();
+document.getElementById("copyGrad").addEventListener("click", ()=>{
+  navigator.clipboard.writeText(updateGradient());
+});
+
+/* ===========================
+   Contrast Checker
+=========================== */
+const ccFG = document.getElementById("ccFG");
+const ccBG = document.getElementById("ccBG");
+const ccResult = document.getElementById("ccResult");
+document.getElementById("swapCC").addEventListener("click", ()=>{
+  const a = ccFG.value; ccFG.value = ccBG.value; ccBG.value = a; updateCC();
+});
+function updateCC(){
+  const fg = hexToRgb(ccFG.value), bg = hexToRgb(ccBG.value);
+  const ratio = contrast(fg,bg).toFixed(2);
+  let status = "❌ Fail";
+  if(ratio>=7) status = "🌟 AAA";
+  else if(ratio>=4.5) status = "✅ AA";
+  ccResult.textContent = `Ratio: ${ratio} ${status}`;
+}
+[ccFG, ccBG].forEach(el=> el.addEventListener("input", updateCC));
+updateCC();
+
+/* ===========================
+   Camera / Photo Picker
+=========================== */
+const photoCanvas = document.getElementById("photoCanvas");
+const pctx = photoCanvas.getContext("2d");
+let camStream = null;
+let photoFrozen = false;
+
+document.getElementById("openCam").addEventListener("click", async ()=>{
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+    const video = document.createElement("video");
+    video.srcObject = camStream; await video.play();
+    const draw = ()=>{
+      if(!camStream) return;
+      pctx.drawImage(video, 0,0, photoCanvas.width, photoCanvas.height);
+      requestAnimationFrame(draw);
+    };
+    draw();
+  }catch(err){
+    alert("Camera not accessible: " + err);
+  }
+});
+document.getElementById("stopCam").addEventListener("click", ()=>{
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+});
+document.getElementById("photoInput").addEventListener("change", (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const img = new Image();
+  img.onload = ()=>{
+    // Fit image into canvas keeping aspect ratio
+    pctx.clearRect(0,0,photoCanvas.width, photoCanvas.height);
+    const scale = Math.min(photoCanvas.width/img.width, photoCanvas.height/img.height);
+    const w = img.width*scale, h = img.height*scale;
+    const ox = (photoCanvas.width - w)/2, oy = (photoCanvas.height - h)/2;
+    pctx.drawImage(img, ox, oy, w, h);
+  };
+  img.src = URL.createObjectURL(file);
+});
+photoCanvas.addEventListener("mousemove", (e)=>{
+  if(photoFrozen) return;
+  const r = photoCanvas.getBoundingClientRect();
+  const x = e.clientX-r.left, y = e.clientY-r.top;
+  const px = pctx.getImageData(x,y,1,1).data;
+  updateDisplay(px[0],px[1],px[2]);
+});
+photoCanvas.addEventListener("contextmenu", (e)=>{e.preventDefault(); photoFrozen=!photoFrozen;});
+
+/* ===========================
+   Palette & Project Manager
+=========================== */
+const projName = document.getElementById("projName");
+const projSelect = document.getElementById("projSelect");
+const projectsList = document.getElementById("projectsList");
+const currentProjectName = document.getElementById("currentProjectName");
+const currentPalette = document.getElementById("currentPalette");
+
+let projects = {};        // { name: [ "#hex", ... ] }
+let current = null;
+let undoStack = [];       // stack of {projects: deepCopy, current}
+let redoStack = [];
+
+function pushHistory(){
+  undoStack.push(JSON.parse(JSON.stringify({projects, current})));
+  if(undoStack.length>100) undoStack.shift();
+  redoStack = []; // clear redo on new action
+}
+function undo(){
+  if(!undoStack.length) return;
+  const snap = undoStack.pop();
+  redoStack.push(JSON.parse(JSON.stringify({projects, current})));
+  projects = snap.projects; current = snap.current;
+  refreshUI();
+}
+function redo(){
+  if(!redoStack.length) return;
+  const snap = redoStack.pop();
+  undoStack.push(JSON.parse(JSON.stringify({projects, current})));
+  projects = snap.projects; current = snap.current;
+  refreshUI();
+}
+
+function refreshProjectSelect(){
+  projSelect.innerHTML = "";
+  const optPlaceholder = document.createElement("option");
+  optPlaceholder.textContent = "Select project..."; optPlaceholder.value = "";
+  projSelect.appendChild(optPlaceholder);
+  Object.keys(projects).forEach(name=>{
+    const o = document.createElement("option");
+    o.value = name; o.textContent = name + (name===current?" (open)":"");
+    projSelect.appendChild(o);
+  });
+}
+function renderProjectsList(){
+  projectsList.innerHTML = "";
+  Object.entries(projects).forEach(([name, arr])=>{
+    const card = document.createElement("div");
+    card.className="project-card";
+    const head = document.createElement("div");
+    head.className="project-head";
+    const title = document.createElement("div");
+    title.className="project-name"; title.textContent = name + (name===current?" • OPEN":"");
+    const act = document.createElement("div");
+    act.className="inline-actions";
+    const b1 = document.createElement("button"); b1.className="btn"; b1.textContent="Open";
+    b1.onclick=()=>{current=name; refreshUI();};
+    const b2 = document.createElement("button"); b2.className="btn"; b2.textContent="Export";
+    b2.onclick=()=>exportProject(name);
+    const b3 = document.createElement("button"); b3.className="btn"; b3.textContent="Delete";
+    b3.onclick=()=>deleteProject(name);
+    act.append(b1,b2,b3);
+    head.append(title, act);
+    const mini = document.createElement("div"); mini.className="mini-grid";
+    arr.forEach(hex=>{
+      const m=document.createElement("div"); m.className="mini"; m.style.background=hex; m.title=hex;
+      mini.appendChild(m);
+    });
+    card.append(head, mini);
+    projectsList.appendChild(card);
+  });
+}
+function renderCurrent(){
+  if(!current){ currentProjectName.textContent="No project opened"; currentPalette.innerHTML=""; return;}
+  currentProjectName.textContent = "Project: " + current;
+  currentPalette.innerHTML = "";
+  (projects[current]||[]).forEach((hex, idx)=>{
+    const sw = document.createElement("div"); sw.className="swatch"; sw.style.background=hex; sw.title=hex;
+    sw.addEventListener("click", ()=> updateDisplay(...hexToRgb(hex)));
+    sw.addEventListener("contextmenu", (e)=>{e.preventDefault(); pushHistory(); projects[current].splice(idx,1); refreshUI();});
+    currentPalette.appendChild(sw);
+  });
+}
+function refreshUI(){
+  refreshProjectSelect();
+  renderProjectsList();
+  renderCurrent();
+}
+
+function createProject(){
+  const name = projName.value.trim();
+  if(!name) return alert("Enter a project name");
+  if(projects[name]) return alert("Project already exists");
+  pushHistory();
+  projects[name]=[];
+  current = name;
+  projName.value="";
+  refreshUI();
+}
+function openProject(){
+  const name = projSelect.value;
+  if(!name) return alert("Pick a project from the dropdown");
+  current = name; refreshUI();
+}
+function renameProject(){
+  if(!current) return alert("Open a project first");
+  const nn = prompt("New name for project:", current);
+  if(!nn) return;
+  if(projects[nn] && nn!==current) return alert("A project with that name already exists");
+  pushHistory();
+  projects[nn] = projects[current];
+  if(nn!==current) delete projects[current];
+  current = nn;
+  refreshUI();
+}
+function deleteProject(name=null){
+  const target = name || current;
+  if(!target) return;
+  if(!projects[target]) return;
+  if(!confirm(`Delete project "${target}"?`)) return;
+  pushHistory();
+  delete projects[target];
+  if(current===target) current=null;
+  refreshUI();
+}
+function addCurrentColor(){
+  if(!current) return alert("Open a project first");
+  const hex = elHEX.textContent;
+  if(!projects[current].includes(hex)){
+    pushHistory();
+    projects[current].push(hex);
+    refreshUI();
+  }
+}
+function exportProject(name=null){
+  const target = name || current;
+  if(!target) return alert("Open a project first");
+  const data = projects[target] || [];
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `${target}.json`; a.click();
+}
+function exportHEX(){
+  if(!current) return alert("Open a project first");
+  const lines = (projects[current]||[]).join("\n");
+  const blob = new Blob([lines], {type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `${current}.hex.txt`; a.click();
+}
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const arr = JSON.parse(reader.result);
+      if(!Array.isArray(arr)) throw new Error("JSON must be an array of HEX strings");
+      if(!current) { alert("No project open. Creating 'Imported' project."); current="Imported"; projects[current]=[]; }
+      pushHistory();
+      const norm = arr.map(s=>s.toString().trim().toLowerCase()).filter(s=>/^#?[0-9a-f]{6}$/.test(s)).map(s=> s.startsWith("#")?s:"#"+s);
+      projects[current].push(...norm.filter(h=>!projects[current].includes(h)));
+      refreshUI();
+    }catch(e){ alert("Invalid JSON: "+e.message); }
+  };
+  reader.readAsText(file);
+}
+document.getElementById("createProj").addEventListener("click", createProject);
+document.getElementById("openProj").addEventListener("click", openProject);
+document.getElementById("renameProj").addEventListener("click", renameProject);
+document.getElementById("deleteProj").addEventListener("click", ()=>deleteProject(null));
+document.getElementById("addToProj").addEventListener("click", addCurrentColor);
+document.getElementById("expJSON").addEventListener("click", ()=>exportProject(null));
+document.getElementById("expHEX").addEventListener("click", exportHEX);
+document.getElementById("impJSON").addEventListener("change", (e)=>{ if(e.target.files[0]) importJSON(e.target.files[0]); });
+document.getElementById("undoBtn").addEventListener("click", undo);
+document.getElementById("redoBtn").addEventListener("click", redo);
+
+/* Init with a default project for convenience */
+(function init(){
+  projects = { "Demo Project": ["#ff0066","#ffcc00","#00d084","#00a2ff","#8a2be2"] };
+  current = "Demo Project";
+  refreshUI();
+  updateDisplay(0,0,0);
+})();
+</script>
+</body>
+</html>
